@@ -1,7 +1,7 @@
 ﻿using EnterpriseKnowledgeAssistant.Application.Interfaces;
 using EnterpriseKnowledgeAssistant.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-
+using Pgvector.EntityFrameworkCore;
 namespace EnterpriseKnowledgeAssistant.Infrastructure.Persistence;
 
 public class ApplicationDbContext : DbContext, IApplicationDbContext
@@ -11,7 +11,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         : base(options)
     {
     }
-
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.HasPostgresExtension("vector");
+        modelBuilder.Entity<DocumentChunk>()
+            .Property(d => d.Embedding)
+            .HasColumnType("vector(1536)");
+    }
     public DbSet<Document> Documents => Set<Document>();
 
     public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();

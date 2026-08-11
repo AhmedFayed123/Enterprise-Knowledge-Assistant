@@ -3,7 +3,7 @@ using EnterpriseKnowledgeAssistant.Application.Services;
 using EnterpriseKnowledgeAssistant.Infrastructure.Persistence;
 using EnterpriseKnowledgeAssistant.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-
+using EnterpriseKnowledgeAssistant.Infrastructure.AI;
 namespace EnterpriseKnowledgeAssistant.API;
 
 public class Program
@@ -23,8 +23,22 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(
-                builder.Configuration.GetConnectionString("DefaultConnection")));
+       options.UseNpgsql(
+           builder.Configuration.GetConnectionString("DefaultConnection"),
+           npgsqlOptions =>
+           {
+               npgsqlOptions.UseVector();
+           }));
+        var geminiApiKey = builder.Configuration["Gemini:ApiKey"];
+
+        if (string.IsNullOrWhiteSpace(geminiApiKey))
+        {
+            throw new InvalidOperationException(
+                "Gemini API key is not configured.");
+        }
+
+        builder.Services.AddSingleton<IEmbeddingService>(
+            new GeminiEmbeddingService(geminiApiKey));
         // register application services and infra implementations
         builder.Services.AddScoped<IDocumentService, DocumentService>();
         builder.Services.AddScoped<IPdfTextExtractor, PdfTextExtractor>();
@@ -48,3 +62,5 @@ public class Program
         app.Run();
     }
 }
+
+//AQ.Ab8RN6LxOtakDcZIp-szUwVAl8E4GT316vPGE81j4R5OEamAKQ
