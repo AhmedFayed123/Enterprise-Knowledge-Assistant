@@ -1,0 +1,45 @@
+using EnterpriseKnowledgeAssistant.Application.Interfaces;
+using EnterpriseKnowledgeAssistant.Application.Services;
+using EnterpriseKnowledgeAssistant.Infrastructure.Persistence;
+using EnterpriseKnowledgeAssistant.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
+
+namespace EnterpriseKnowledgeAssistant.API;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddControllers();
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection")));
+        // register application services and infra implementations
+        builder.Services.AddScoped<IDocumentService, DocumentService>();
+        builder.Services.AddScoped<IPdfTextExtractor, PdfTextExtractor>();
+        // Map the application-facing Db context interface to the EF DbContext implementation
+        builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        builder.Services.AddScoped<TextChunker>();
+        var app = builder.Build();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        app.Run();
+    }
+}
