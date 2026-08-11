@@ -1,29 +1,39 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-// removed System.Reflection.Metadata to avoid 'Document' type ambiguity
-using System.Text;
-using System.Threading.Tasks;
+﻿using EnterpriseKnowledgeAssistant.Application.Interfaces;
 using EnterpriseKnowledgeAssistant.Domain.Entities;
-using EnterpriseKnowledgeAssistant.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
-namespace EnterpriseKnowledgeAssistant.Infrastructure.Persistence
+
+namespace EnterpriseKnowledgeAssistant.Infrastructure.Persistence;
+
+public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
-    public class ApplicationDbContext : DbContext, IApplicationDbContext
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options)
+        : base(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
+    }
 
-        }
-        public DbSet<Domain.Entities.Document> Documents { get; set; }
-        public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();
+    public DbSet<Document> Documents => Set<Document>();
 
-        IQueryable<Domain.Entities.Document> IApplicationDbContext.Documents => Documents;
+    public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();
 
-        public void AddDocument(Domain.Entities.Document document)
-        {
-            Documents.Add(document);
-        }
+    IQueryable<Document> IApplicationDbContext.Documents
+        => Documents;
+
+    public void AddDocument(Document document)
+    {
+        Documents.Add(document);
+    }
+    public async Task<List<Document>> GetDocumentsWithChunksAsync(
+    CancellationToken cancellationToken = default)
+    {
+        return await Documents
+            .Include(d => d.Chunks)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+    public async Task<int> SaveChangesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

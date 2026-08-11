@@ -4,21 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EnterpriseKnowledgeAssistant.Domain.Entities
+namespace EnterpriseKnowledgeAssistant.Application.Models
 {
-    public class DocumentChunk
+    public class DocumentChunkData
     {
-        public Guid Id { get; set; }
-
-        public Guid DocumentId { get; set; }
-
         public string Content { get; set; } = string.Empty;
 
         public int ChunkIndex { get; set; }
 
         public int PageNumber { get; set; }
-
-        [System.Text.Json.Serialization.JsonIgnore]
-        public Document Document { get; set; } = null!;
     }
 }

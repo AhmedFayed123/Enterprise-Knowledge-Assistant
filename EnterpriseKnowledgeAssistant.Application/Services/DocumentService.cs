@@ -1,11 +1,6 @@
 ﻿using EnterpriseKnowledgeAssistant.Application.Interfaces;
-using EnterpriseKnowledgeAssistant.Application.Interfaces;
 using EnterpriseKnowledgeAssistant.Domain.Entities;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace EnterpriseKnowledgeAssistant.Application.Services
 {
@@ -13,11 +8,16 @@ namespace EnterpriseKnowledgeAssistant.Application.Services
     {
         private readonly IApplicationDbContext _context;
         private readonly IPdfTextExtractor _pdfTextExtractor;
+        private readonly TextChunker _textChunker;
 
-        public DocumentService(IApplicationDbContext context, IPdfTextExtractor pdfTextExtractor)
+        public DocumentService(
+            IApplicationDbContext context,
+            IPdfTextExtractor pdfTextExtractor,
+            TextChunker textChunker)
         {
             _context = context;
             _pdfTextExtractor = pdfTextExtractor;
+            _textChunker = textChunker;
         }
 
         public async Task<object> UploadAsync(IFormFile file)
@@ -40,12 +40,18 @@ namespace EnterpriseKnowledgeAssistant.Application.Services
             var fileName = $"{Guid.NewGuid()}_{file.FileName}";
             var filePath = Path.Combine(uploadsFolder, fileName);
 
-            await using (var stream = new FileStream(filePath, FileMode.Create))
+            await using (var stream = new FileStream(
+                filePath,
+                FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            var extractedText = _pdfTextExtractor.ExtractText(filePath);
+            // Extract PDF pages
+            var pages = _pdfTextExtractor.ExtractPages(filePath);
+
+            // Split pages into chunks
+            var chunks = _textChunker.Split(pages);
 
             var document = new Document
             {
@@ -56,8 +62,22 @@ namespace EnterpriseKnowledgeAssistant.Application.Services
                 Status = "Processed"
             };
 
-            // Persist
+            // Create chunk entities
+            foreach (var chunk in chunks)
+            {
+                document.Chunks.Add(new DocumentChunk
+                {
+                    Id = Guid.NewGuid(),
+                    DocumentId = document.Id,
+                    Content = chunk.Content,
+                    ChunkIndex = chunk.ChunkIndex,
+                    PageNumber = chunk.PageNumber
+                });
+            }
+
+            // Save document and chunks
             _context.AddDocument(document);
+
             await _context.SaveChangesAsync();
 
             return new
@@ -65,14 +85,14 @@ namespace EnterpriseKnowledgeAssistant.Application.Services
                 document.Id,
                 document.FileName,
                 document.Status,
-                TextLength = extractedText.Length
+                Pages = pages.Count,
+                Chunks = chunks.Count
             };
         }
 
-        public Task<IEnumerable<Document>> GetAllAsync()
+        public async Task<IEnumerable<Document>> GetAllAsync()
         {
-            var list = System.Linq.Enumerable.ToList(_context.Documents);
-            return Task.FromResult<IEnumerable<Document>>(list);
+            return await _context.GetDocumentsWithChunksAsync();
         }
     }
 }

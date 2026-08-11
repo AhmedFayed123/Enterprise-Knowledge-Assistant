@@ -1,28 +1,33 @@
-﻿using System;
+﻿using EnterpriseKnowledgeAssistant.Application.Interfaces;
+using EnterpriseKnowledgeAssistant.Application.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text;
 using System.Threading.Tasks;
 using UglyToad.PdfPig;
-using System.Text;
-using EnterpriseKnowledgeAssistant.Application.Interfaces;
 
 namespace EnterpriseKnowledgeAssistant.Infrastructure.Services
 {
     public class PdfTextExtractor : IPdfTextExtractor
     {
-        public string ExtractText(string filePath)
+        public List<ExtractedPage> ExtractPages(string filePath)
         {
             using var document = PdfDocument.Open(filePath);
 
-            var text = new StringBuilder();
+            var pages = new List<ExtractedPage>();
 
             foreach (var page in document.GetPages())
             {
-                text.AppendLine(page.Text);
+                pages.Add(new ExtractedPage
+                {
+                    PageNumber = page.Number,
+                    Text = page.Text
+                });
             }
 
-            return text.ToString();
+            return pages;
         }
     }
 }
