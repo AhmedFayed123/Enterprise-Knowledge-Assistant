@@ -1,5 +1,7 @@
 ﻿using EnterpriseKnowledgeAssistant.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+using System.Linq;
 
 namespace EnterpriseKnowledgeAssistant.API.Controllers;
 
@@ -16,12 +18,12 @@ public class EmbeddingsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Generate(
+        public async Task<IActionResult> Generate(
         [FromBody] string text,
         CancellationToken cancellationToken)
     {
         var embedding = await _embeddingService
-            .GenerateEmbeddingAsync(text, cancellationToken);
+            .GenerateQueryEmbeddingAsync(text, cancellationToken);
 
         return Ok(new
         {

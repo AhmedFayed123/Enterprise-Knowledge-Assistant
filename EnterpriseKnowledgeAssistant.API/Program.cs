@@ -27,7 +27,10 @@ public class Program
            builder.Configuration.GetConnectionString("DefaultConnection"),
            npgsqlOptions =>
            {
+               // enable pgvector support
                npgsqlOptions.UseVector();
+               // enable simple retry on transient failures (e.g. temporary connection issues)
+               npgsqlOptions.EnableRetryOnFailure();
            }));
         var geminiApiKey = builder.Configuration["Gemini:ApiKey"];
 
@@ -39,12 +42,20 @@ public class Program
 
         builder.Services.AddSingleton<IEmbeddingService>(
             new GeminiEmbeddingService(geminiApiKey));
+        builder.Services.AddScoped<IChatService>(
+    _ => new GeminiChatService(geminiApiKey));
         // register application services and infra implementations
         builder.Services.AddScoped<IDocumentService, DocumentService>();
         builder.Services.AddScoped<IPdfTextExtractor, PdfTextExtractor>();
         // Map the application-facing Db context interface to the EF DbContext implementation
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         builder.Services.AddScoped<TextChunker>();
+        builder.Services.AddScoped<SemanticSearchService>();
+        builder.Services.AddScoped<ISemanticSearchRepository,
+    SemanticSearchRepository>();
+        builder.Services.AddScoped<RagService>();
+        builder.Services.AddScoped<IChatService>(
+    _ => new GeminiChatService(geminiApiKey));
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())

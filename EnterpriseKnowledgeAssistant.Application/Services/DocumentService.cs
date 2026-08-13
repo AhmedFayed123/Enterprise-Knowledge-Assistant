@@ -70,7 +70,7 @@ public class DocumentService : IDocumentService
         foreach (var chunk in chunks)
         {
             var embedding = await _embeddingService
-                .GenerateEmbeddingAsync(chunk.Content);
+                .GenerateDocumentEmbeddingAsync(chunk.Content);
 
             document.Chunks.Add(new DocumentChunk
             {

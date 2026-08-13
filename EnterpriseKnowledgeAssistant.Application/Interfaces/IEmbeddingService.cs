@@ -8,8 +8,12 @@ namespace EnterpriseKnowledgeAssistant.Application.Interfaces
 {
     public interface IEmbeddingService
     {
-        Task<float[]> GenerateEmbeddingAsync(
-    string text,
-    CancellationToken cancellationToken = default);
+        Task<float[]> GenerateDocumentEmbeddingAsync(
+            string text,
+            CancellationToken cancellationToken = default);
+
+        Task<float[]> GenerateQueryEmbeddingAsync(
+            string text,
+            CancellationToken cancellationToken = default);
     }
 }
