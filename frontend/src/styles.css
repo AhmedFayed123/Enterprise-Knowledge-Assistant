@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { @apply bg-gray-50 text-gray-900; }
+
+/* Small helper styles */
+.chat-scroll { max-height: 60vh; overflow: auto; }
+.message-user { @apply bg-blue-500 text-white; }
+.message-assistant { @apply bg-gray-100 text-gray-900; }
+

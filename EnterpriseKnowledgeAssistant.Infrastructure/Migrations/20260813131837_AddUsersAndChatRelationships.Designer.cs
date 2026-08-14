@@ -3,6 +3,7 @@ using System;
 using EnterpriseKnowledgeAssistant.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,9 +13,11 @@ using Pgvector;
 namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260813131837_AddUsersAndChatRelationships")]
+    partial class AddUsersAndChatRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 
                     b.HasIndex("ConversationId");
 
-                    b.ToTable("ChatMessages", (string)null);
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.Conversation", b =>
@@ -73,7 +76,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Conversations", (string)null);
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.Document", b =>
@@ -99,7 +102,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Documents", (string)null);
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.DocumentChunk", b =>
@@ -128,7 +131,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 
                     b.HasIndex("DocumentId");
 
-                    b.ToTable("DocumentChunks", (string)null);
+                    b.ToTable("DocumentChunks");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.User", b =>
@@ -154,7 +157,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.ChatMessage", b =>

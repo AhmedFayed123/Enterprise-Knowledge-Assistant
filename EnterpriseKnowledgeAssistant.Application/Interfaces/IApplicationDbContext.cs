@@ -1,16 +1,23 @@
 using EnterpriseKnowledgeAssistant.Domain.Entities;
+using System.Linq;
+using EnterpriseKnowledgeAssistant.Domain.Entities;
 
-namespace EnterpriseKnowledgeAssistant.Application.Interfaces;
-
-public interface IApplicationDbContext
+namespace EnterpriseKnowledgeAssistant.Application.Interfaces
 {
-    IQueryable<Document> Documents { get; }
+    public interface IApplicationDbContext
+    {
+        IQueryable<Document> Documents { get; }
 
-    void AddDocument(Document document);
+        IQueryable<User> Users { get; }
 
-    Task<List<Document>> GetDocumentsWithChunksAsync(
-        CancellationToken cancellationToken = default);
+        void AddUser(User user);
 
-    Task<int> SaveChangesAsync(
-        CancellationToken cancellationToken = default);
+        void AddDocument(Document document);
+
+        Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default);
+
+        Task<List<Document>> GetDocumentsWithChunksAsync(
+            CancellationToken cancellationToken = default);
+    }
 }

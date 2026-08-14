@@ -3,6 +3,7 @@ using System;
 using EnterpriseKnowledgeAssistant.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,9 +13,11 @@ using Pgvector;
 namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260813124543_AddConversations")]
+    partial class AddConversations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 
                     b.HasIndex("ConversationId");
 
-                    b.ToTable("ChatMessages", (string)null);
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.Conversation", b =>
@@ -66,14 +69,9 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Conversations", (string)null);
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.Document", b =>
@@ -99,7 +97,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Documents", (string)null);
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.DocumentChunk", b =>
@@ -128,33 +126,7 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
 
                     b.HasIndex("DocumentId");
 
-                    b.ToTable("DocumentChunks", (string)null);
-                });
-
-            modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("DocumentChunks");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.ChatMessage", b =>
@@ -166,16 +138,6 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Conversation");
-                });
-
-            modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.Conversation", b =>
-                {
-                    b.HasOne("EnterpriseKnowledgeAssistant.Domain.Entities.User", "User")
-                        .WithMany("Conversations")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.DocumentChunk", b =>
@@ -197,11 +159,6 @@ namespace EnterpriseKnowledgeAssistant.Infrastructure.Migrations
             modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.Document", b =>
                 {
                     b.Navigation("Chunks");
-                });
-
-            modelBuilder.Entity("EnterpriseKnowledgeAssistant.Domain.Entities.User", b =>
-                {
-                    b.Navigation("Conversations");
                 });
 #pragma warning restore 612, 618
         }
